@@ -35,3 +35,10 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+@import url("leaflet/dist/leaflet.css");
+
+.leaflet-container {
+  width: 100%;
+  height: 100vh;
+}
