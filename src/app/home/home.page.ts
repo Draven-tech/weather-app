@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { AlertController } from '@ionic/angular';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-home',
@@ -22,12 +24,24 @@ export class HomePage {
   sunriseTime = '';
   sunsetTime = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private alertCtrl: AlertController) {}
 
-  ngAfterViewInit() {
-    this.loadMap();
+  // Show the location access alert
+  async showLocationAlert() {
+    const alert = await this.alertCtrl.create({
+      header: 'Location Access',
+      message: 'This app would like to access your location for weather updates.',
+      buttons: ['OK'],
+    });
+
+    await alert.present();
   }
 
+  ngAfterViewInit() {
+    this.showLocationAlert().then(() => {
+      this.loadMap();
+    });
+  }
   loadMap() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -35,7 +49,6 @@ export class HomePage {
   
         this.map = L.map('map').setView([latitude, longitude], 13);
   
-        // Use Esri Satellite for a satellite view
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
           attribution: '&copy; Esri & contributors'
         }).addTo(this.map);
@@ -149,6 +162,7 @@ export class HomePage {
   }
   
 
+  // NOT WORKING - IN PROGRESS
   toggleLightMode(event: any) {
     const lightMode = event.detail.checked;
   
