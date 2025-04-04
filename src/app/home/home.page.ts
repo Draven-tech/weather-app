@@ -125,6 +125,7 @@ export class HomePage {
     }
   }
 
+
   searchCity() {
     if (!this.searchQuery.trim()) return;
   

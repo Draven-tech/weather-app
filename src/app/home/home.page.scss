@@ -24,9 +24,12 @@ ion-content {
   margin-bottom: 10px;
 }
 
-.weather-card, .forecast-card {
-  background-color: var(--card-bg);
-  color: var(--card-text);
+.weather-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 10px;
+  padding: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .weather-details {
@@ -43,4 +46,13 @@ ion-content {
 
 ion-searchbar {
   margin: 10px;
+}
+
+.forecast-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 10px auto;
+  padding: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
