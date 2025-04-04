@@ -42,6 +42,7 @@ export class HomePage {
       this.loadMap();
     });
   }
+  
   loadMap() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -66,13 +67,15 @@ export class HomePage {
           .bindPopup('You are here!')
           .openPopup();
   
-        this.getWeather(latitude, longitude);
+        this.getWeather(latitude, longitude);  // Fetch the weather data
+        this.getForecast(latitude, longitude); // Fetch the 5-day forecast
       },
       (error) => {
         console.error('Geolocation error:', error);
       }
     );
-  }  
+  }
+  
 
   initializeMap(lat: number, lon: number) {
     this.map = L.map('map').setView([lat, lon], 13);
