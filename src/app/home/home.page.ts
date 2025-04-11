@@ -6,6 +6,9 @@ import { IonicModule, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
 import { Network } from '@capacitor/network';
+import { MenuController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -24,52 +27,105 @@ export class HomePage implements AfterViewInit {
   sunriseTime = '';
   sunsetTime = '';
   userMarker: any;
+  loading = false;
+  isDarkMode = false;
+  alertEnabled = localStorage.getItem('alertsEnabled') !== 'false';
 
-  constructor(private http: HttpClient, private alertCtrl: AlertController) {}
+  constructor(
+    private http: HttpClient,
+    private alertCtrl: AlertController,
+    private menuCtrl: MenuController,
+    private router: Router,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light-theme');
-      document.body.classList.remove('dark-theme');
-    } else {
-      document.body.classList.add('dark-theme');
-      document.body.classList.remove('light-theme');
-    }
+    const storedTheme = this.themeService.getDarkMode();
+    this.isDarkMode = storedTheme !== null ? storedTheme : false;
+    this.themeService.applyTheme(this.isDarkMode);
+  }
+  
+  ngAfterViewInit() {
+    this.loadMap();
   }
 
-  ngAfterViewInit() {
-    this.loadMap(); 
+
+  toggleLightMode(event: any) {
+    this.themeService.toggleDarkMode(event.detail.checked);
+    this.isDarkMode = event.detail.checked;
+    localStorage.setItem('darkMode', JSON.stringify(this.isDarkMode));
+  }
+
+  openMenu() {
+    this.menuCtrl.open();
   }
 
   async loadMap() {
+    this.loading = true;
+
+    const status = await Network.getStatus();
+    const hasInternet = await this.hasInternetAccess();
+
+    if (!status.connected || !hasInternet) {
+      const alert = await this.alertCtrl.create({
+        header: 'Offline Mode',
+        message: 'You are currently offline. Would you like to go to offline mode?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          {
+            text: 'Yes',
+            handler: () => this.router.navigate(['/offline-mode']),
+          },
+        ],
+      });
+      await alert.present();
+      this.loading = false;
+      return;
+    }
+
     try {
       const coordinates = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
-        timeout: 10000
+        timeout: 10000,
       });
-  
+
       const lat = coordinates.coords.latitude;
       const lon = coordinates.coords.longitude;
-  
+
       this.initializeMap(lat, lon);
       this.addUserMarker(lat, lon);
-  
       this.getWeather(lat, lon);
       this.getForecast(lat, lon);
-  
     } catch (err) {
-      console.error('Geolocation error:', err);
-      const status = await Network.getStatus();
-      this.showOfflineNotification();
+      const alert = await this.alertCtrl.create({
+        header: 'Location Error',
+        message: 'We couldn’t fetch your current location. Please check your location settings.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+    } finally {
+      this.loading = false;
     }
   }
-  
+
+  async hasInternetAccess(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Cebu&appid=${this.apiKey}`, {
+        method: 'GET',
+        signal: controller.signal,
+        cache: 'no-store',
+      });
+      clearTimeout(timeout);
+      return response.status === 200;
+    } catch {
+      return false;
+    }
+  }
 
   initializeMap(lat: number, lon: number) {
-    if (this.map) {
-      this.map.remove();
-    }
+    if (this.map) this.map.remove();
 
     this.map = L.map('map').setView([lat, lon], 13);
 
@@ -100,17 +156,27 @@ export class HomePage implements AfterViewInit {
   getWeather(lat: number, lon: number) {
     const unit = this.isCelsius ? 'metric' : 'imperial';
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${unit}&appid=${this.apiKey}`;
+
     this.http.get(url).subscribe((data: any) => {
       this.weather = data;
       this.sunriseTime = new Date(data.sys.sunrise * 1000).toLocaleTimeString();
       this.sunsetTime = new Date(data.sys.sunset * 1000).toLocaleTimeString();
-      // localStorage.setItem('weatherData', JSON.stringify(data)); // Caching disabled
+      localStorage.setItem('weatherData', JSON.stringify(this.weather));
+
+      if (this.alertEnabled) {
+        const weatherMain = data.weather[0]?.main.toLowerCase();
+        const severeConditions = ['thunderstorm', 'tornado', 'extreme', 'ash', 'squall'];
+        if (severeConditions.includes(weatherMain)) {
+          this.showSevereAlert(weatherMain);
+        }
+      }
     });
   }
 
   getForecast(lat: number, lon: number) {
     const unit = this.isCelsius ? 'metric' : 'imperial';
     const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unit}&appid=${this.apiKey}`;
+
     this.http.get(url).subscribe((data: any) => {
       const daily: any = {};
       data.list.forEach((item: any) => {
@@ -128,18 +194,8 @@ export class HomePage implements AfterViewInit {
         temp: daily[date].temp,
         icon: daily[date].icon,
       }));
-
-      // localStorage.setItem('forecastData', JSON.stringify(this.forecast)); // Caching disabled
     });
   }
-
-    // cacheWeatherData(data: any) {
-    //   localStorage.setItem('weatherData', JSON.stringify(data));
-    // }
-
-    // cacheForecastData(forecast: any) {
-    //   localStorage.setItem('forecastData', JSON.stringify(forecast));
-    // }
 
   toggleTemperatureUnit() {
     this.isCelsius = !this.isCelsius;
@@ -150,14 +206,19 @@ export class HomePage implements AfterViewInit {
     }
   }
 
+  toggleAlerts(event: any) {
+    this.alertEnabled = event.detail.checked;
+    localStorage.setItem('alertsEnabled', this.alertEnabled.toString());
+  }
+
   searchCity() {
     if (!this.searchQuery.trim()) return;
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.searchQuery)}`;
+
     this.http.get<any[]>(url).subscribe((results) => {
       if (results.length > 0) {
-        const { lat, lon } = results[0];
-        const parsedLat = parseFloat(lat);
-        const parsedLon = parseFloat(lon);
+        const parsedLat = parseFloat(results[0].lat);
+        const parsedLon = parseFloat(results[0].lon);
         this.map.setView([parsedLat, parsedLon], 13);
 
         if (this.userMarker) this.map.removeLayer(this.userMarker);
@@ -171,23 +232,10 @@ export class HomePage implements AfterViewInit {
     });
   }
 
-  toggleLightMode(event: any) {
-    const lightMode = event.detail.checked;
-    if (lightMode) {
-      document.body.classList.add('light-theme');
-      document.body.classList.remove('dark-theme');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.body.classList.add('dark-theme');
-      document.body.classList.remove('light-theme');
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-
-  async showOfflineNotification() {
+  async showSevereAlert(condition: string) {
     const alert = await this.alertCtrl.create({
-      header: 'Offline Mode',
-      message: 'You are currently offline. Please connect to a network to gather weather information.',
+      header: 'Severe Weather Alert',
+      message: `A severe weather condition has been detected: <strong>${condition}</strong>. Stay safe!`,
       buttons: ['OK'],
     });
     await alert.present();

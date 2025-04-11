@@ -1,21 +1,49 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <div class="header-content">
-      <ion-title>Weather & Map App - Zandale</ion-title>
-      <ion-toggle
-        (ionChange)="toggleLightMode($event)" checked slot="end"></ion-toggle>
-    </div>
+    <ion-title>Weather & Map App - Zandale</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openMenu()" aria-label="Open settings">
+        <ion-icon name="settings-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content fullscreen>
+<ion-menu side="end" menuId="settingsMenu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Settings</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-item>
+      <ion-label>Dark Mode</ion-label>
+      <ion-toggle
+        [(ngModel)]="isDarkMode"
+        (ionChange)="toggleLightMode($event)">
+      </ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Enable Severe Weather Alerts</ion-label>
+      <ion-toggle
+        [(ngModel)]="alertEnabled"
+        (ionChange)="toggleAlerts($event)">
+      </ion-toggle>
+    </ion-item>
+  </ion-content>
+</ion-menu>
+
+<ion-loading *ngIf="loading" message="Fetching weather..." spinner="crescent"></ion-loading>
+
+<ion-content id="main-content" fullscreen>
   <ion-searchbar
     [(ngModel)]="searchQuery"
     (ionInput)="searchCity()"
-    placeholder="Search for a city..."
-  ></ion-searchbar>
+    placeholder="Search for a city...">
+  </ion-searchbar>
 
-  <div id="map"></div>
+  <div id="map" aria-label="Weather Map"></div>
 
   <ion-card *ngIf="weather" class="weather-card">
     <ion-card-header>
@@ -29,15 +57,14 @@
         <div class="weather-icon">
           <img
             [src]="'https://openweathermap.org/img/wn/' + weather.weather[0].icon + '@2x.png'"
-            alt="Weather Icon"
-          />
+            alt="Weather Icon" />
         </div>
         <div>
           <h2>{{ weather.main.temp }}°{{ isCelsius ? 'C' : 'F' }}</h2>
           <p><strong>Feels Like:</strong> {{ weather.main.feels_like }}°{{ isCelsius ? 'C' : 'F' }}</p>
           <p><ion-icon name="rainy-outline"></ion-icon> {{ weather.weather[0].description | titlecase }}</p>
           <p><ion-icon name="water-outline"></ion-icon> Humidity: {{ weather.main.humidity }}%</p>
-          <p><ion-icon name="speedometer-outline"></ion-icon> Wind Speed: {{ weather.wind.speed }} m/s</p>
+          <p><ion-icon name="speedometer-outline"></ion-icon> Wind: {{ weather.wind.speed }} m/s</p>
           <p><ion-icon name="speedometer-outline"></ion-icon> Pressure: {{ weather.main.pressure }} hPa</p>
           <p><ion-icon name="sunny-outline"></ion-icon> Sunrise: {{ sunriseTime }}</p>
           <p><ion-icon name="moon-outline"></ion-icon> Sunset: {{ sunsetTime }}</p>
@@ -53,14 +80,15 @@
     <ion-card-header>
       <ion-card-title>5-Day Forecast</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content class="forecast-card-content">
       <div *ngFor="let day of forecast">
         <p><strong>{{ day.date }}</strong></p>
         <p>
-          <img [src]="'https://openweathermap.org/img/wn/' + day.icon + '@2x.png'" alt="Forecast Icon" />
+          <img [src]="'https://openweathermap.org/img/wn/' + day.icon + '@2x.png'"
+               alt="Forecast icon for {{ day.date }}" />
         </p>
         <p>{{ day.temp }}°{{ isCelsius ? 'C' : 'F' }}</p>
       </div>
     </ion-card-content>
   </ion-card>
-</ion-content>  
+</ion-content>

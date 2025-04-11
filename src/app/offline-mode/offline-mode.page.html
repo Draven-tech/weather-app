@@ -1,0 +1,44 @@
+<ion-menu side="end" menuId="settingsMenu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Settings</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-item>
+      <ion-label>Dark Mode</ion-label>
+      <ion-toggle
+        [(ngModel)]="isDarkMode"
+        (ionChange)="toggleLightMode($event)">
+      </ion-toggle>
+    </ion-item>
+  </ion-content>
+</ion-menu>
+
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-menu-button menu="settingsMenuOffline"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Offline Mode</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content id="main-content">
+  <div *ngIf="loading" class="loading">
+    <ion-spinner></ion-spinner>
+    <p>Loading weather data...</p>
+  </div>
+
+  <div *ngIf="!loading && weather">
+    <h2>{{ weather.name }}</h2>
+    <p>{{ weather.weather[0].description }}</p>
+    <p>{{ weather.main.temp }} °{{ isCelsius ? 'C' : 'F' }}</p>
+    <p>Sunrise: {{ sunriseTime }}</p>
+    <p>Sunset: {{ sunsetTime }}</p>
+  </div>
+
+  <div *ngIf="!loading && !weather">
+    <p>No weather data available. Please check your connection.</p>
+  </div>
+</ion-content>
