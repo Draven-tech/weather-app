@@ -44,38 +44,27 @@ export class HomePage implements AfterViewInit {
 
   async loadMap() {
     try {
-      const coordinates = await Geolocation.getCurrentPosition();
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+  
       const lat = coordinates.coords.latitude;
       const lon = coordinates.coords.longitude;
-
+  
       this.initializeMap(lat, lon);
-
-      this.userMarker = L.marker([lat, lon], {
-        icon: L.icon({
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
-        })
-      }).addTo(this.map)
-      .bindPopup('You are here!')
-      .openPopup();
-
+      this.addUserMarker(lat, lon);
+  
       this.getWeather(lat, lon);
       this.getForecast(lat, lon);
+  
     } catch (err) {
       console.error('Geolocation error:', err);
-
       const status = await Network.getStatus();
-      if (status.connected) {
-        this.showOfflineNotification();
-      } else {
-        this.showOfflineNotification();
-      }
+      this.showOfflineNotification();
     }
   }
+  
 
   initializeMap(lat: number, lon: number) {
     if (this.map) {
@@ -87,18 +76,24 @@ export class HomePage implements AfterViewInit {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
+  }
 
+  addUserMarker(lat: number, lon: number) {
     const icon = L.icon({
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       shadowSize: [41, 41],
     });
 
+    if (this.userMarker) {
+      this.map.removeLayer(this.userMarker);
+    }
+
     this.userMarker = L.marker([lat, lon], { icon }).addTo(this.map)
-      .bindPopup('You are here!')
+      .bindPopup('Your current location')
       .openPopup();
   }
 
@@ -109,7 +104,7 @@ export class HomePage implements AfterViewInit {
       this.weather = data;
       this.sunriseTime = new Date(data.sys.sunrise * 1000).toLocaleTimeString();
       this.sunsetTime = new Date(data.sys.sunset * 1000).toLocaleTimeString();
-      this.cacheWeatherData(data);
+      // localStorage.setItem('weatherData', JSON.stringify(data)); // Caching disabled
     });
   }
 
@@ -134,53 +129,17 @@ export class HomePage implements AfterViewInit {
         icon: daily[date].icon,
       }));
 
-      this.cacheForecastData(this.forecast);
+      // localStorage.setItem('forecastData', JSON.stringify(this.forecast)); // Caching disabled
     });
   }
 
-  cacheWeatherData(data: any) {
-    localStorage.setItem('weatherData', JSON.stringify(data));
-  }
+    // cacheWeatherData(data: any) {
+    //   localStorage.setItem('weatherData', JSON.stringify(data));
+    // }
 
-  async loadOfflineData(lat: number, lon: number) {
-    const status = await Network.getStatus();
-    if (!status.connected) {
-      const cachedData = localStorage.getItem('weatherData');
-      const cachedForecast = localStorage.getItem('forecastData');
-      if (cachedData && cachedForecast) {
-        this.weather = JSON.parse(cachedData);
-        this.forecast = JSON.parse(cachedForecast);
-        this.alertUserOffline();
-      } else {
-        this.alertUserNoNetwork();
-      }
-    } else {
-      this.getWeather(lat, lon);
-      this.getForecast(lat, lon);
-    }
-  }
-
-  async alertUserOffline() {
-    const alert = await this.alertCtrl.create({
-      header: 'Offline Mode',
-      message: 'You are offline. Weather information is being displayed from cached data.',
-      buttons: ['OK'],
-    });
-    await alert.present();
-  }
-
-  async alertUserNoNetwork() {
-    const alert = await this.alertCtrl.create({
-      header: 'Network Error',
-      message: 'You are offline and there is no cached data available. Please connect to a network.',
-      buttons: ['OK'],
-    });
-    await alert.present();
-  }
-
-  cacheForecastData(forecast: any) {
-    localStorage.setItem('forecastData', JSON.stringify(forecast));
-  }
+    // cacheForecastData(forecast: any) {
+    //   localStorage.setItem('forecastData', JSON.stringify(forecast));
+    // }
 
   toggleTemperatureUnit() {
     this.isCelsius = !this.isCelsius;

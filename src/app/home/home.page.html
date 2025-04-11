@@ -1,12 +1,20 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Weather & Map App - Zandale</ion-title>
-    <ion-toggle (ionChange)="toggleLightMode($event)" checked></ion-toggle>
+    <div class="header-content">
+      <ion-title>Weather & Map App - Zandale</ion-title>
+      <ion-toggle
+        (ionChange)="toggleLightMode($event)" checked slot="end"></ion-toggle>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="searchCity()"></ion-searchbar>
+<ion-content fullscreen>
+  <ion-searchbar
+    [(ngModel)]="searchQuery"
+    (ionInput)="searchCity()"
+    placeholder="Search for a city..."
+  ></ion-searchbar>
+
   <div id="map"></div>
 
   <ion-card *ngIf="weather" class="weather-card">
@@ -19,7 +27,10 @@
     <ion-card-content>
       <div class="weather-details">
         <div class="weather-icon">
-          <img [src]="'https://openweathermap.org/img/wn/' + weather.weather[0].icon + '@2x.png'" alt="Weather Icon">
+          <img
+            [src]="'https://openweathermap.org/img/wn/' + weather.weather[0].icon + '@2x.png'"
+            alt="Weather Icon"
+          />
         </div>
         <div>
           <h2>{{ weather.main.temp }}°{{ isCelsius ? 'C' : 'F' }}</h2>
@@ -32,7 +43,9 @@
           <p><ion-icon name="moon-outline"></ion-icon> Sunset: {{ sunsetTime }}</p>
         </div>
       </div>
-      <ion-button expand="full" (click)="toggleTemperatureUnit()">Switch to {{ isCelsius ? 'Fahrenheit' : 'Celsius' }}</ion-button>
+      <ion-button expand="full" (click)="toggleTemperatureUnit()">
+        Switch to {{ isCelsius ? 'Fahrenheit' : 'Celsius' }}
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
@@ -43,9 +56,11 @@
     <ion-card-content>
       <div *ngFor="let day of forecast">
         <p><strong>{{ day.date }}</strong></p>
-        <p><img [src]="'https://openweathermap.org/img/wn/' + day.icon + '@2x.png'" alt="Forecast Icon"></p>
+        <p>
+          <img [src]="'https://openweathermap.org/img/wn/' + day.icon + '@2x.png'" alt="Forecast Icon" />
+        </p>
         <p>{{ day.temp }}°{{ isCelsius ? 'C' : 'F' }}</p>
       </div>
     </ion-card-content>
   </ion-card>
-</ion-content>
+</ion-content>  
