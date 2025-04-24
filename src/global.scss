@@ -44,42 +44,46 @@
 }
 
 :root {
-  --ion-background-color: #ffffff;
+  --ion-background-color: #e6f4ff;  // Light sky blue background
   --ion-text-color: #333333;
-  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-background: #87ceeb;  // Sky blue toolbar
   --ion-toolbar-color: #333333;
-  --ion-card-background: #ffffff;
+  --ion-card-background: rgba(255, 255, 255, 0.9);  // Slightly transparent white
   --ion-card-color: #333333;
-  --ion-item-background: #ffffff;
+  --ion-item-background: rgba(255, 255, 255, 0.8);  // Slightly transparent white
   --ion-item-color: #333333;
 }
 
 .light-theme {
-  --ion-background-color: #f5f5f5;
-  --ion-text-color: #333;
-  --forecast-card-bg: #cac6c6;
-  --ion-toolbar-background: #ffffff;
-  --ion-toolbar-color: #000000;
-  --ion-card-background: #ffffff;
-  --ion-card-color: #000000;
-  --ion-item-background: #ffffff;
-  --ion-item-color: #000000;
-  --ion-button-background: #0066ff;
-  --ion-button-color: #ffffff;
-  --ion-item-divider-background: #f1f1f1;
-  --ion-item-divider-color: #ccc;
-  --card-title-color: #333;
+  --ion-background-color: #e6f7ff; // Soft sky blue background
+  --ion-text-color: #1a237e; // Dark blue text for better contrast
+  --forecast-card-bg: rgba(255, 255, 255, 0.7); // Semi-transparent white cards
+  --ion-toolbar-background: #4fc3f7; // Bright sky blue toolbar
+  --ion-toolbar-color: #01579b; // Dark blue text for toolbar
+  --ion-card-background: rgba(255, 255, 255, 0.8); // Semi-transparent cards
+  --ion-card-color: #0d47a1; // Dark blue text for cards
+  --ion-item-background: rgba(255, 255, 255, 0.6); // More transparent items
+  --ion-button-background: #0288d1; // Ocean blue buttons
+  --ion-button-color: #ffffff; // White button text
+  --card-title-color: #01579b; // Dark blue titles
+  --ion-item-divider-background: rgba(255, 255, 255, 0.7);
+  --ion-item-divider-color: #666;
   --ion-input-placeholder-color: #666;
   --ion-input-color: #000;
-  --ion-input-border-color: #cccccc;
-  --background: #f5f5f5;
+  --ion-input-border-color: #a8d8ff;  // Light blue border
+  --background: #e6f4ff;
+  
+  // Additional weather-themed colors
+  --weather-primary: #1e88e5;
+  --weather-secondary: #64b5f6;
+  --weather-accent: #0d47a1;
 }
 
 .dark-theme {
   --ion-background-color: #121212;
   --ion-text-color: #ffffff;
   --forecast-card-bg: #2a2a2a;
-  --ion-toolbar-background: #333333;
+  --ion-toolbar-background: #1a237e;  // Dark blue toolbar
   --ion-toolbar-color: #ffffff;
   --ion-card-background: #1e1e1e;
   --ion-card-color: #ffffff;
@@ -94,9 +98,19 @@
   --ion-input-color: #ffffff;
   --ion-input-border-color: #444444;
   --background: #1e1e1e;
+  
+  // Dark mode weather colors
+  --weather-primary: #1565c0;
+  --weather-secondary: #0d47a1;
+  --weather-accent: #42a5f5;
 }
 
 ion-content {
   --background: var(--ion-background-color);
   color: var(--ion-text-color);
+  background: linear-gradient(
+    to bottom,
+    var(--weather-primary),
+    var(--weather-secondary)
+  );
 }

@@ -30,6 +30,9 @@ export class HomePage implements AfterViewInit {
   loading = false;
   isDarkMode = false;
   alertEnabled = localStorage.getItem('alertsEnabled') !== 'false';
+  mapTileProvider = localStorage.getItem('mapTileProvider') || 'openstreetmap';
+  tileLayer: any;
+  isMapFullscreen = false;
 
   constructor(
     private http: HttpClient,
@@ -49,6 +52,14 @@ export class HomePage implements AfterViewInit {
     this.loadMap();
   }
 
+  toggleMapFullscreen() {
+    this.isMapFullscreen = !this.isMapFullscreen;
+    if (this.map) {
+      requestAnimationFrame(() => {
+        this.map.invalidateSize();
+      });
+    }
+}
 
   toggleLightMode(event: any) {
     this.themeService.toggleDarkMode(event.detail.checked);
@@ -99,7 +110,7 @@ export class HomePage implements AfterViewInit {
     } catch (err) {
       const alert = await this.alertCtrl.create({
         header: 'Location Error',
-        message: 'We couldn’t fetch your current location. Please check your location settings.',
+        message: 'We couldn\'t fetch your current location. Please check your location settings.',
         buttons: ['OK'],
       });
       await alert.present();
@@ -128,10 +139,30 @@ export class HomePage implements AfterViewInit {
     if (this.map) this.map.remove();
 
     this.map = L.map('map').setView([lat, lon], 13);
+    this.setMapTileProvider();
+  }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(this.map);
+  setMapTileProvider() {
+    if (this.tileLayer) {
+      this.map.removeLayer(this.tileLayer);
+    }
+
+    if (this.mapTileProvider === 'esri') {
+      this.tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash',
+        maxZoom: 19
+      }).addTo(this.map);
+    } else {
+      this.tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(this.map);
+    }
+  }
+
+  changeMapTileProvider() {
+    localStorage.setItem('mapTileProvider', this.mapTileProvider);
+    this.setMapTileProvider();
   }
 
   addUserMarker(lat: number, lon: number) {

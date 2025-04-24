@@ -1,21 +1,44 @@
-#map {
+// Map Container Styles
+#map-container {
+  position: relative;
   height: 300px;
   width: 100%;
   margin: 10px 0;
   border-radius: 12px;
+  overflow: hidden;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    border-radius: 0;
+    z-index: 1000;
+  }
 }
 
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+// Card Styles
 .weather-card {
   margin: 20px;
   border-radius: 12px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
   background-color: var(--ion-card-background);
   transition: box-shadow 0.3s ease-in-out;
-}
 
-.weather-card:hover {
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  &:hover {
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .weather-details {
@@ -42,10 +65,10 @@
   text-align: center;
   background-color: var(--ion-card-background);
   transition: box-shadow 0.3s ease-in-out;
-}
 
-.forecast-card:hover {
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  &:hover {
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .forecast-card-content {
@@ -53,21 +76,22 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+
+  > div {
+    flex: 1 1 100px;
+    background-color: var(--forecast-card-bg);
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
 }
 
-.forecast-card-content > div {
-  flex: 1 1 100px;
-  background-color: var(--forecast-card-bg);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.forecast-card-content > div:hover {
-  transform: translateY(-5px);
-}
-
+// Header Styles
 ion-header {
   padding-top: env(safe-area-inset-top);
   background-color: var(--ion-toolbar-background);
@@ -82,7 +106,7 @@ ion-toolbar {
 }
 
 ion-header ion-toolbar:first-of-type {
-  padding-top: 30px;
+  padding-top: 1px;
 }
 
 .header-content {
@@ -93,6 +117,7 @@ ion-header ion-toolbar:first-of-type {
   align-items: center;
 }
 
+// Typography
 ion-card-title {
   color: var(--card-title-color);
   font-size: 18px;
@@ -105,6 +130,7 @@ ion-title {
   color: var(--ion-text-color);
 }
 
+// Content Styles
 ion-content {
   --padding-top: env(safe-area-inset-top);
   font-family: 'Roboto', sans-serif;
@@ -118,6 +144,21 @@ ion-searchbar {
   --background: var(--ion-background-color);
 }
 
+// Menu Styles
+ion-menu {
+  --width: 250px;
+  --border-radius: 12px;
+  --box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+// Button Styles
+ion-button {
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --color: var(--ion-text-color);
+}
+
+// Toggle Styles
 .mode-toggle {
   --size: 45px;
   --handle-background: #fff;
@@ -126,10 +167,10 @@ ion-searchbar {
   --handle-border-radius: 50%;
   --border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
 
-.mode-toggle[checked]:hover {
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+  &[checked]:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+  }
 }
 
 .header-toggles {
@@ -143,16 +184,4 @@ ion-searchbar {
   ion-item {
     margin-left: 0;
   }
-}
-
-ion-menu {
-  --width: 250px;
-  --border-radius: 12px;
-  --box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-ion-button {
-  --padding-start: 10px;
-  --padding-end: 10px;
-  --color: var(--ion-text-color);
 }
